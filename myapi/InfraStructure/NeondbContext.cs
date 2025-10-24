@@ -24,8 +24,32 @@ public partial class NeondbContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<IncomeCategory> IncomeCategories { get; set; }  
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {        
-      
+    {
+        //set a diferent name to the identity table
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.ToTable(name: "categories");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
+
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.HasKey(e => e.ExpenseId);
+            entity.ToTable(name: "expenses");
+            entity.Property(e => e.ExpenseId).HasColumnName("expense_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
+        
+        modelBuilder.Entity<Income>(entity =>
+        {          
+            entity.HasKey(e => e.IncomeId);
+            entity.ToTable(name: "income");
+            entity.Property(e => e.IncomeId).HasColumnName("income_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
+     
+     
         base.OnModelCreating(modelBuilder);
     }
 

@@ -7,7 +7,7 @@ public partial class Income
 {
     public int IncomeId { get; set; }
 
-    public int? UserId { get; set; }
+    public string? UserId { get; set; }
 
     public int? IncomeCategoryId { get; set; }
 
@@ -21,5 +21,5 @@ public partial class Income
 
     public virtual IncomeCategory? IncomeCategory { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual ApplicationUser? User { get; set; }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using ContextHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,10 @@ public static class GenericRoutes
         var group = app.MapGroup($"/{controllerName}").RequireAuthorization();
         group.MapPost("/", async (
                 [FromServices] IRepository<T> service,
-                [FromBody] T item) => await service.AddAsync(item))
+                [FromBody] T item, ClaimsPrincipal user) =>{
+                    item.GetType().GetProperty("UserId")?.SetValue(item, user.FindFirstValue(ClaimTypes.NameIdentifier));
+                    await service.AddAsync(item); 
+                })
             .WithOpenApi();
 
         group.MapGet("/", ([FromServices] IRepository<T> crudService) => crudService.FindAllAsync(e => true));

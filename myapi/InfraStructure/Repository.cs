@@ -1,10 +1,8 @@
-using System;
 using System.Linq.Expressions;
+using ContextHelpers;
 using Microsoft.EntityFrameworkCore;
-
-namespace ContextHelpers;
-
-public class Repository<T>(DbContext _context) : IRepository<T> where T : class, new()
+using myapi.Infrastructure;
+public class Repository<T>(NeondbContext _context) : IRepository<T> where T : class, new()
 {
     public async Task AddAsync(T entity)
     {
