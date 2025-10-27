@@ -8,11 +8,13 @@ using ContextHelpers;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
+using myapi.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -68,7 +70,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.AddGenericCrudRoutes<Category>("Category");
+app.AddGenericCrudRoutes<CategoryDto,Category,CategoryMapper>("Category");
 app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader()
