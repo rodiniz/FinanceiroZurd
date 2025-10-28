@@ -18,8 +18,9 @@ public static class GenericRoutes
         group.MapPost("/", async (
                 [FromServices] IRepository<E> service,
                 [FromBody] D item, ClaimsPrincipal user) =>{     
-                    item.GetType().GetProperty("UserId")?.SetValue(item, int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!));               
+                    item.GetType().GetProperty("UserId")?.SetValue(item, user.FindFirstValue(ClaimTypes.NameIdentifier));
                     await service.AddAsync(new M().ToEntity(item));
+                    
                     return Results.Created($"/{controllerName}/", item);
                 })
             .WithOpenApi();

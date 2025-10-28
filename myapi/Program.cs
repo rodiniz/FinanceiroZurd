@@ -29,9 +29,38 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+
+        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogDebug("Authorization header on incoming request: {Header}", context.Request.Headers["Authorization"].ToString());
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError(context.Exception, "JWT authentication failed");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("JWT challenge: {Error}", context.ErrorDescription);
+                return Task.CompletedTask;
+            }
+        };
     });
 builder.Services.AddAuthorization();
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultCors", policy => policy
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader() 
+    );
+});
 builder.AddServiceDefaults();
 
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
@@ -67,15 +96,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors("DefaultCors");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.AddGenericCrudRoutes<CategoryDto,Category,CategoryMapper>("Category");
-app.UseCors(x => x
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .AllowAnyOrigin()
-);
+
+
 app.MapIdentityApi<ApplicationUser>();
 
 
