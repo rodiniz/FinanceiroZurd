@@ -19,7 +19,8 @@ public class CategoryMapper : IMappperDto<CategoryDto, Category>
         return new CategoryDto
         {
             Id = entity.CategoryId,
-            Name = entity.Name
+            Name = entity.Name,
+            UserId=entity.UserId
         };
     }
 

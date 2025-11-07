@@ -9,7 +9,7 @@ namespace myapi;
 
 public static class GenericRoutes
 {
-    public static void AddGenericCrudRoutes<D, E,M>(this WebApplication app, string controllerName) 
+    public static void AddGenericCrudRoutes<D, E,M>(this WebApplication app, string controllerName, string IdColumnName) 
         where D : class, new()
         where E : class, new()
         where M : IMappperDto<D,E>, new()
@@ -25,14 +25,16 @@ public static class GenericRoutes
                 })
             .WithOpenApi();
 
-        group.MapGet("/", async ([FromServices] IRepository<E> crudService, ClaimsPrincipal user) =>
+        group.MapGet("/", async (HttpContext context,[FromServices] IRepository<E> crudService, ClaimsPrincipal user) =>
         {
+             context.Response.Headers["Cache-Control"] = "no-store, no-cache";
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
             var entities = await crudService.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId);
             return Results.Ok(new M().FromEntityList(entities.ToList()));
         });
-        group.MapGet("/{id}", async ([FromServices] IRepository<E> crudService, int id) =>{
-           var result = await crudService.FindAsync(x => EF.Property<int>(x, "Id") == id);
+        group.MapGet("/{id}", async (HttpContext context,[FromServices] IRepository<E> crudService, int id) =>{
+           context.Response.Headers["Cache-Control"] = "no-store, no-cache";
+           var result = await crudService.FindAsync(x => EF.Property<int>(x, IdColumnName) == id);
            return result is not null ? Results.Ok(new M().FromEntity(result)) : Results.NotFound();
         });
         group.MapPut("/{id}", async ([FromServices] IRepository<E> crudService, int id, [FromBody] D item) =>
@@ -40,6 +42,6 @@ public static class GenericRoutes
             await crudService.UpdateAsync(id, new M().ToEntity(item));
             return Results.NoContent();
         });
-        group.MapDelete("/{id}", async ([FromServices] IRepository<E> crudService, int id) => await crudService.DeleteAsync(x => EF.Property<int>(x, "Id") == id));
+        group.MapDelete("/{id}", async ([FromServices] IRepository<E> crudService, int id) => await crudService.DeleteAsync(x => EF.Property<int>(x, IdColumnName) == id));
     }
 }

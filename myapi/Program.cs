@@ -104,7 +104,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.AddGenericCrudRoutes<CategoryDto,Category,CategoryMapper>("Category");
+app.AddGenericCrudRoutes<CategoryDto,Category,CategoryMapper>("Category","CategoryId");
 
 
 app.MapIdentityApi<ApplicationUser>();
