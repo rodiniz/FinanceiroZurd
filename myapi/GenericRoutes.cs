@@ -1,41 +1,41 @@
-using System;
-using System.Security.Claims;
 using ContextHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using myapi.Dtos;
+using System.Security.Claims;
 
 namespace myapi;
 
 public static class GenericRoutes
 {
-    public static void AddGenericCrudRoutes<D, E,M>(this WebApplication app, string controllerName, string IdColumnName) 
+    public static void AddGenericCrudRoutes<D, E, M>(this WebApplication app, string controllerName, string IdColumnName)
         where D : class, new()
         where E : class, new()
-        where M : IMappperDto<D,E>, new()
+        where M : IMappperDto<D, E>, new()
     {
         var group = app.MapGroup($"/{controllerName}").RequireAuthorization();
         group.MapPost("/", async (
                 [FromServices] IRepository<E> service,
-                [FromBody] D item, ClaimsPrincipal user) =>{     
-                    item.GetType().GetProperty("UserId")?.SetValue(item, user.FindFirstValue(ClaimTypes.NameIdentifier));
-                    await service.AddAsync(new M().ToEntity(item));
-                    
-                    return Results.Created($"/{controllerName}/", item);
-                })
+                [FromBody] D item, ClaimsPrincipal user) =>
+        {
+            item.GetType().GetProperty("UserId")?.SetValue(item, user.FindFirstValue(ClaimTypes.NameIdentifier));
+            await service.AddAsync(new M().ToEntity(item));
+
+            return Results.Created($"/{controllerName}/", item);
+        })
             .WithOpenApi();
 
-        group.MapGet("/", async (HttpContext context,[FromServices] IRepository<E> crudService, ClaimsPrincipal user) =>
+        group.MapGet("/", async ([FromServices] IRepository<E> crudService, ClaimsPrincipal user,
+                [AsParameters] PageQueryDto dto) =>
         {
-             context.Response.Headers["Cache-Control"] = "no-store, no-cache";
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-            var entities = await crudService.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId);
-            return Results.Ok(new M().FromEntityList(entities.ToList()));
+            var entities = await crudService.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId, dto.Skip, dto.Take, dto.OrderBy);
+            return Results.Ok(new M().FromEntityList(entities));
         });
-        group.MapGet("/{id}", async (HttpContext context,[FromServices] IRepository<E> crudService, int id) =>{
-           context.Response.Headers["Cache-Control"] = "no-store, no-cache";
-           var result = await crudService.FindAsync(x => EF.Property<int>(x, IdColumnName) == id);
-           return result is not null ? Results.Ok(new M().FromEntity(result)) : Results.NotFound();
+        group.MapGet("/{id}", async ([FromServices] IRepository<E> crudService, int id) =>
+        {
+            var result = await crudService.FindAsync(x => EF.Property<int>(x, IdColumnName) == id);
+            return result is not null ? Results.Ok(new M().FromEntity(result)) : Results.NotFound();
         });
         group.MapPut("/{id}", async ([FromServices] IRepository<E> crudService, int id, [FromBody] D item) =>
         {

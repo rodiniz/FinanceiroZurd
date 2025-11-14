@@ -1,17 +1,18 @@
-using System;
+using ContextHelpers;
 using myapi.Dtos;
 
 namespace myapi;
 
 public class CategoryMapper : IMappperDto<CategoryDto, Category>
 {
-    public List<CategoryDto> FromEntityList(List<Category> entities)
+    public PagedResult<CategoryDto> FromEntityList(PagedResult<Category> entities)
     {
-        return entities.Select(e => new CategoryDto
+        var result = new PagedResult<CategoryDto>
         {
-            Id = e.CategoryId,
-            Name = e.Name
-        }).ToList();
+            Count = entities.Count,
+            Items = [.. entities.Items.Select(c => FromEntity(c))]
+        };
+        return result;
     }
 
     public CategoryDto FromEntity(Category entity)
@@ -20,14 +21,14 @@ public class CategoryMapper : IMappperDto<CategoryDto, Category>
         {
             Id = entity.CategoryId,
             Name = entity.Name,
-            UserId=entity.UserId
+            UserId = entity.UserId
         };
     }
 
-    public  Category ToEntity(CategoryDto dto)
+    public Category ToEntity(CategoryDto dto)
     {
         return new Category
-        {           
+        {
             Name = dto.Name,
             UserId = dto.UserId
         };
