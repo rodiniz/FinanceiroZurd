@@ -1,7 +1,7 @@
 using ContextHelpers;
 using myapi.Dtos;
 
-namespace myapi;
+namespace myapi.Mappers;
 
 public class CategoryMapper : IMappperDto<CategoryDto, Category>
 {
@@ -10,7 +10,7 @@ public class CategoryMapper : IMappperDto<CategoryDto, Category>
         var result = new PagedResult<CategoryDto>
         {
             Count = entities.Count,
-            Items = [.. entities.Items.Select(c => FromEntity(c))]
+            Items = [.. entities.Items.Select(FromEntity)]
         };
         return result;
     }

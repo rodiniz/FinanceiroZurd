@@ -1,8 +1,3 @@
-using System;
-
 namespace myapi.Dtos;
 
-public class IncomeDto
-{
-
-}
+public record IncomeDto();

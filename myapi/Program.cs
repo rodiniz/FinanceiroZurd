@@ -1,14 +1,17 @@
+using ContextHelpers;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
-using Npgsql;
-using myapi;
-using myapi.Infrastructure;
-using ContextHelpers;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
+using myapi;
 using myapi.Dtos;
+using myapi.Infrastructure;
+using myapi.Mappers;
+using myapi.Validators;
+using Npgsql;
+using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +61,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("DefaultCors", policy => policy
         .AllowAnyOrigin()
         .AllowAnyMethod()
-        .AllowAnyHeader() 
+        .AllowAnyHeader()
     );
 });
 builder.AddServiceDefaults();
@@ -84,7 +87,7 @@ builder.Services.AddScoped(new Func<IServiceProvider, IUnitOfWork>(sp =>
 }));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
+builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 
 var app = builder.Build();
 
@@ -104,7 +107,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.AddGenericCrudRoutes<CategoryDto,Category,CategoryMapper>("Category","CategoryId");
+app.AddGenericCrudRoutes<CategoryDto, Category, CategoryMapper>("Category", "CategoryId");
+app.AddGenericCrudRoutes<ExpenseDto, Expense, ExpenseMapper>("Category", "CategoryId");
 
 
 app.MapIdentityApi<ApplicationUser>();
