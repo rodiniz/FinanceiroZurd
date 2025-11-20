@@ -43,7 +43,7 @@ public static class GenericRoutes
             var entities = await repository.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId, dto.Skip, dto.Take, dto.OrderBy);
             return Results.Ok(new M().FromEntityList(entities));
         });
-        group.MapGet("/{id}", async ([FromServices] IRepository<E> respository, int id) =>
+        group.MapGet("/{id:int}", async ([FromServices] IRepository<E> respository, int id) =>
         {
             var result = await respository.FindAsync(x => EF.Property<int>(x, IdColumnName) == id);
             return result is not null ? Results.Ok(new M().FromEntity(result)) : Results.NotFound();

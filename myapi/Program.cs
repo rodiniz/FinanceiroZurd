@@ -108,7 +108,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.AddGenericCrudRoutes<CategoryDto, Category, CategoryMapper>("Category", "CategoryId");
-app.AddGenericCrudRoutes<ExpenseDto, Expense, ExpenseMapper>("Category", "CategoryId");
+app.AddGenericCrudRoutes<ExpenseDto, Expense, ExpenseMapper>("Expense", "ExpenseId");
 
 
 app.MapIdentityApi<ApplicationUser>();
