@@ -27,6 +27,11 @@ public class ExpenseMapper : IMappperDto<ExpenseDto, Expense>
         return result;
     }
 
+    public List<ExpenseDto> FromEntityList(List<Expense> entities)
+    {
+        return entities.Select(FromEntity).ToList();
+    }
+
     public Expense ToEntity(ExpenseDto dto)
     {
         return new Expense

@@ -33,4 +33,9 @@ public class CategoryMapper : IMappperDto<CategoryDto, Category>
             UserId = dto.UserId
         };
     }
+
+    public List<CategoryDto> FromEntityList(List<Category> entities)
+    {
+        return entities.Select(FromEntity).ToList();
+    }
 }

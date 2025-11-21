@@ -15,7 +15,7 @@ public class Repository<T>(NeondbContext _context) : IRepository<T> where T : cl
         return await _context.Set<T>().FirstOrDefaultAsync(predicate);
     }
 
-    public async Task<PagedResult<T>> FindAllAsync(Expression<Func<T, bool>> predicate, int skip, int take, string orderBy)
+    public async Task<PagedResult<T>> FindPagedAsync(Expression<Func<T, bool>> predicate, int skip, int take, string orderBy)
     {
         var query = _context.Set<T>().AsNoTracking()
              .Where(predicate)
@@ -46,5 +46,13 @@ public class Repository<T>(NeondbContext _context) : IRepository<T> where T : cl
         await _context.Set<T>()
                 .Where(predicate)
                 .ExecuteDeleteAsync();
+    }
+
+    public async Task<List<T>> FindAllAsync(Expression<Func<T, bool>> predicate, string orderBy)
+    {
+        var query = _context.Set<T>().AsNoTracking()
+            .Where(predicate)
+            .OrderByDynamic(orderBy);
+        return await query.ToListAsync();
     }
 }

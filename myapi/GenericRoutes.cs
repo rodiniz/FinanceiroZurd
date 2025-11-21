@@ -40,7 +40,16 @@ public static class GenericRoutes
                 [AsParameters] PageQueryDto dto) =>
         {
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-            var entities = await repository.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId, dto.Skip, dto.Take, dto.OrderBy);
+            var entities = await repository.FindPagedAsync(e => EF.Property<string>(e, "UserId") == userId, dto.Skip, dto.Take, dto.OrderBy);
+            return Results.Ok(new M().FromEntityList(entities));
+        });
+
+
+        group.MapGet("/all", async ([FromServices] IRepository<E> repository, ClaimsPrincipal user,
+                [AsParameters] OrderByDto dto) =>
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var entities = await repository.FindAllAsync(e => EF.Property<string>(e, "UserId") == userId, dto.OrderBy);
             return Results.Ok(new M().FromEntityList(entities));
         });
         group.MapGet("/{id:int}", async ([FromServices] IRepository<E> respository, int id) =>
