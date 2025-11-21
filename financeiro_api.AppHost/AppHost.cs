@@ -1,6 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var api= builder.AddProject<Projects.myapi>("api")
+builder.AddDockerComposeEnvironment("financeiro");
+
+var api = builder.AddProject<Projects.myapi>("api")
        .WithExternalHttpEndpoints();
 
 
@@ -9,6 +11,6 @@ builder.AddNpmApp("angular", "../financeiro_zurd")
    .WaitFor(api)
    .WithHttpEndpoint(env: "PORT")
    .WithExternalHttpEndpoints()
-   .PublishAsDockerFile();    
-    
+   .PublishAsDockerFile();
+
 builder.Build().Run();
